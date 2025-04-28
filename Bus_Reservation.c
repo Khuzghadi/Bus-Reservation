@@ -24,6 +24,7 @@ struct agent_details {
 } a;
 
 struct Bus_details{
+	int serial_no;
 	char starts[100];
 	char ends[100];
 	char bus_number[10];
@@ -40,7 +41,17 @@ void add_route() {
 
     printf("\n=== ADD NEW BUS ROUTE ===\n");
 
-    // Get bus number with validation
+ int last_serial = 1;
+    fp = fopen("Bus_Details.dat", "rb");
+    if (fp != NULL) {
+        struct Bus_details temp;
+        while (fread(&temp, sizeof(temp), 1, fp) == 1) {
+            last_serial = temp.serial_no;
+        }
+    }
+    fclose(fp);
+}
+	bd.serial_no = last_serial + 1;
     while(1) {
         printf("Enter Bus Number (e.g., BUS-001): ");
         if(scanf("%10s", bd.bus_number) == 1) {  // Limit input to prevent overflow
@@ -112,6 +123,7 @@ void add_route() {
 
     fclose(fp);
 }
+
 
 struct user_detail {
     char name[15];
@@ -411,8 +423,8 @@ void view_all_routes() {
 
     printf("\n=========== AVAILABLE BUS ROUTES ===========\n");
     printf("-------------------------------------------\n");
-    printf("| %-10s | %-15s | %-15s | %-8s | %-10s |\n", 
-           "Bus No.", "From", "To", "Seats", "Type");
+    printf("| %-5s | %-10s | %-15s | %-15s | %-8s | %-10s |\n",
+       "S.No", "Bus No.", "From", "To", "Seats", "Type");
     printf("-------------------------------------------\n");
 
     int route_count = 0;
@@ -420,12 +432,8 @@ void view_all_routes() {
     // Read and display all routes
     while (fread(&bd, sizeof(bd), 1, fp) == 1) {
         route_count++;
-        printf("| %-10s | %-15s | %-15s | %-8d | %-10s |\n", 
-               bd.bus_number, 
-               bd.starts, 
-               bd.ends, 
-               bd.seat_avail, 
-               bd.bus_type);
+        printf("| %-5d | %-10s | %-15s | %-15s | %-8d | %-10s |\n",
+       bd.serial_no, bd.bus_number, bd.starts, bd.ends, bd.seat_avail, bd.bus_type);
     }
 
     printf("-------------------------------------------\n");
